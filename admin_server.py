@@ -11,7 +11,7 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-DB = 'barbershop.db'
+DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'barbershop.db')
 
 
 def get_db():
