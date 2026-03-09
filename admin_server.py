@@ -9,9 +9,27 @@ Open: http://localhost:5000
 from flask import Flask, jsonify, send_file, request
 import sqlite3
 import os
+import requests as http_requests
 
 app = Flask(__name__)
 DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'barbershop.db')
+
+# Load tokens from config
+try:
+    from config import BARBER_BOT_TOKEN
+except Exception:
+    BARBER_BOT_TOKEN = os.environ.get('BARBER_BOT_TOKEN', '')
+
+
+def send_telegram(token, chat_id, text):
+    """Send a Telegram message to a user."""
+    try:
+        http_requests.post(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            json={'chat_id': chat_id, 'text': text, 'parse_mode': 'HTML'}
+        )
+    except Exception as e:
+        print(f'Telegram notify error: {e}')
 
 
 def get_db():
@@ -173,21 +191,49 @@ def api_stats():
     })
 
 
-@app.route('/api/shops/<int:shop_id>/approve', methods=['POST'])
+REPLACE_APPROVE
 def approve_shop(shop_id):
     conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        SELECT bs.name, u.telegram_id 
+        FROM barbershops bs
+        LEFT JOIN users u ON bs.owner_id = u.telegram_id
+        WHERE bs.id = ?
+    """, (shop_id,))
+    row = c.fetchone()
     conn.execute("UPDATE barbershops SET is_active = 1 WHERE id = ?", (shop_id,))
     conn.commit()
     conn.close()
+    if row and row['telegram_id']:
+        send_telegram(
+            BARBER_BOT_TOKEN, row['telegram_id'],
+            f"✅ Ваша барбершоп одобрена!\n\n🏪 {row['name']} теперь активна.\nКлиенты могут записываться к вам!"
+        )
     return jsonify({'ok': True})
 
 
 @app.route('/api/shops/<int:shop_id>/reject', methods=['POST'])
 def reject_shop(shop_id):
     conn = get_db()
+    c = conn.cursor()
+    data = request.get_json() or {}
+    reason = data.get('reason', 'Не указана')
+    c.execute("""
+        SELECT bs.name, u.telegram_id 
+        FROM barbershops bs
+        LEFT JOIN users u ON bs.owner_id = u.telegram_id
+        WHERE bs.id = ?
+    """, (shop_id,))
+    row = c.fetchone()
     conn.execute("UPDATE barbershops SET is_active = -1 WHERE id = ?", (shop_id,))
     conn.commit()
     conn.close()
+    if row and row['telegram_id']:
+        send_telegram(
+            BARBER_BOT_TOKEN, row['telegram_id'],
+            f"❌ Ваша заявка отклонена\n\n🏪 {row['name']}\nПричина: {reason}\n\nИсправьте данные и подайте заявку снова."
+        )
     return jsonify({'ok': True})
 
 
