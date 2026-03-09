@@ -191,7 +191,7 @@ def api_stats():
     })
 
 
-REPLACE_APPROVE
+@app.route('/api/shops/<int:shop_id>/approve', methods=['POST'])
 def approve_shop(shop_id):
     conn = get_db()
     c = conn.cursor()
