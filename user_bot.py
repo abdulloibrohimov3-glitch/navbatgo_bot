@@ -232,36 +232,36 @@ def show_main_menu(message, user_id):
 
     markup.add(
         InlineKeyboardButton(
-            f"✂️ {get_text(user_id, 'choose_barbershop')}", callback_data='book_new'),
+            f"{get_text(user_id, 'choose_barbershop')}", callback_data='book_new'),
         InlineKeyboardButton(
-            f"📍 {get_text(user_id, 'nearby')}", callback_data='nearby_shops')
+            f"{get_text(user_id, 'nearby')}", callback_data='nearby_shops')
     )
 
     markup.add(
         InlineKeyboardButton(
-            f"📒 {get_text(user_id, 'my_bookings')}", callback_data='my_bookings'),
+            f"{get_text(user_id, 'my_bookings')}", callback_data='my_bookings'),
         InlineKeyboardButton(
-            f"🔍 {get_text(user_id, 'search')}", callback_data='search_shops')
+            f"{get_text(user_id, 'search')}", callback_data='search_shops')
     )
 
     markup.add(
         InlineKeyboardButton(
-            f"⚙️ {get_text(user_id, 'settings')}", callback_data='settings'),
+            f"{get_text(user_id, 'settings')}", callback_data='settings'),
         InlineKeyboardButton(
-            f"❓ {get_text(user_id, 'help')}", callback_data='help')
+            f"{get_text(user_id, 'help')}", callback_data='help')
     )
 
     if isinstance(message, types.Message):
         bot.send_message(
             message.chat.id,
-            f"🏠 *{get_text(user_id, 'main_menu')} - NavbatGo*\n\n"
+            f"*{get_text(user_id, 'main_menu')} - NavbatGo*\n\n"
             f"Выберите действие:",
             parse_mode='Markdown',
             reply_markup=markup
         )
     else:
         bot.edit_message_text(
-            f"🏠 *{get_text(user_id, 'main_menu')} - NavbatGo*\n\n"
+            f"*{get_text(user_id, 'main_menu')} - NavbatGo*\n\n"
             f"Выберите действие:",
             message.chat.id,
             message.message_id,
